@@ -1,3 +1,4 @@
+#! /bin/bash
 #####################################
 # Author: Robbie Powell
 # Version: v1.0.0
@@ -10,6 +11,7 @@
 #$2 Destination domain
 sdir=$(awk -F"[:= ]" '/$1/{print $11}' /etc/userdatadomains | column -t | head -n1)
 ddir=$(awk -F"[:= ]" '/$2/{print $11}' /etc/userdatadomains | column -t | head -n1)
+duser=$(/scripts/whoowns $2)
 ####################################
 
 
@@ -56,11 +58,17 @@ WPDBPASS=$(cat wp-config.php | grep DB_PASSWORD | cut -d \' -f 4)
 
 mysqldump –u "$WPDBUSER"  –p "$WPDBPASS" "$WPDBNAME" > source.sql
 cd "$ddir" || exit
-su -H -u  bash -c 
+su -H -u duser bash -c 
 wp config create --dbname="$db_name"--dbuser="$db_user" --dbpass="$db_user_pw"
+exit
+cd || exit
 #destination
-mysql -u dbname="$db_name"  -p db_user_pw "$db_name" < source.sql
+mysql -u dbname="$db_name"  -p db_user_pw "$db_user" < source.sql
 
 
 #search and replace on destination site from $1 to $2 will need to run command as user
+su -H -u $duser bash -c 
 cd  "$ddir" wp search-replace "$1" "$2" --all-tables --precise || exit;
+exit
+cd || exit
+curl -l $2
