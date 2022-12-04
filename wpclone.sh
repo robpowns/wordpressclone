@@ -56,7 +56,7 @@ WPDBPASS=$(cat wp-config.php | grep DB_PASSWORD | cut -d \' -f 4)
 
 mysqldump –u "$WPDBUSER"  –p "$WPDBPASS" "$WPDBNAME" > source.sql
 cd "$ddir" || exit
-sudo -H -u  bash -c 
+su -H -u  bash -c 
 wp config create --dbname="$db_name"--dbuser="$db_user" --dbpass="$db_user_pw"
 #destination
 mysql -u dbname="$db_name"  -p db_user_pw "$db_name" < source.sql
