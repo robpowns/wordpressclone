@@ -52,7 +52,15 @@ read db_name
 read db_user
 read db_user_pw
 #dump db (check source config file for details) copy source db to destination
+WPDBNAME=`cat wp-config.php | grep DB_NAME | cut -d \' -f 4`
+WPDBUSER=`cat wp-config.php | grep DB_USER | cut -d \' -f 4`
+WPDBPASS=`cat wp-config.php | grep DB_PASSWORD | cut -d \' -f 4`
+
+mysqldump –u $WPDBUSER  –p $WPDBPASS $WPDBNAME > source.sql
+cd $ddir wp config create --dbname=$db_name--dbuser=db_user --dbpass=db_user_pw
+#destination
+mysql -u dbname=$db_name  -p db_user_pw $db_name < source.sql
 
 
 #search and replace on destination site from $1 to $2 will need to run command as user
- wp search-replace \"$1\" \"$2\" --all-tables --precise;\
+cd $ddir wp search-replace \"$1\" \"$2\" --all-tables --precise;\
